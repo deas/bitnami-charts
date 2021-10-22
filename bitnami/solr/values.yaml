@@ -820,3 +820,9 @@ exporter:
   ## https://kubernetes.io/docs/concepts/services-networking/add-entries-to-pod-etc-hosts-with-host-aliases/
   ##
   hostAliases: []
+
+  hooks:
+    pre-install: []
+    args: []
+    command: []
+    image: "none"

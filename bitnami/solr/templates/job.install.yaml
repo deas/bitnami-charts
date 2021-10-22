@@ -42,8 +42,8 @@ spec:
           image: {{ $hook.image }}
           imagePullPolicy: {{ .Values.image.pullPolicy | quote }}
           command: {{- toYaml $hook.command | nindent 12 }}
-          args: {{- toYaml $$hook.args | nindent 12 }}
-          resources: {{- toYaml $$hook.resources | nindent 12 }}
+          args: {{- toYaml $hook.args | nindent 12 }}
+          resources: {{- toYaml $hook.resources | nindent 12 }}
           volumeMounts:
             - name: config-volume
               mountPath: /etc/es-curator
