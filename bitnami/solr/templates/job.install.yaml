@@ -1,0 +1,61 @@
+{{- range $kind, $hook := .Values.hooks }}
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ template "solr.fullname" . }}-{{ $kind }}
+  labels: {{- include "common.labels.standard" . | nindent 4 }}
+    app.kubernetes.io/component: solr
+  annotations:
+    "helm.sh/hook": post-{{ $kind }}
+    "helm.sh/hook-weight": "1"
+    {{/*- if $.Values.cronjob.annotations }}
+    {{- toYaml $.Values.cronjob.annotations | nindent 4 }}
+    {{- end */}}
+spec:
+ template:
+    metadata:
+      labels: {{- include "common.labels.standard" . | nindent 10 }}
+        app.kubernetes.io/component: solr
+      {{- if $.Values.podAnnotations }}
+      annotations: {{- toYaml $.Values.podAnnotations | nindent 8 }}
+      {{- end }}
+    spec:
+      restartPolicy: Never
+      {{/*- if $.Values.curator.priorityClassName }}
+      priorityClassName: {{ $.Values.curator.priorityClassName | quote }}
+      {{- end }}
+      {{- if .Values.curator.schedulerName }}
+      schedulerName: {{ .Values.curator.schedulerName }}
+      {{- end }}
+      {{- if $.Values.curator.affinity }}
+      affinity: {{- include "common.tplvalues.render" (dict "value" $.Values.curator.affinity "context" $) | nindent 8 }}
+      {{- end }}
+      {{- if $.Values.curator.nodeSelector }}
+      nodeSelector: {{- include "common.tplvalues.render" (dict "value" $.Values.curator.nodeSelector "context" $) | nindent 8 }}
+      {{- end }}
+      {{- if $.Values.curator.tolerations }}
+      tolerations: {{- include "common.tplvalues.render" (dict "value" $.Values.curator.tolerations "context" $) | nindent 8 }}
+      {{- end */}}
+      containers:
+        - name: {{ template "solr.fullname" . }}
+          image: {{ $hook.image }}
+          imagePullPolicy: {{ .Values.image.pullPolicy | quote }}
+          command: {{- toYaml $hook.command | nindent 12 }}
+          args: {{- toYaml $$hook.args | nindent 12 }}
+          resources: {{- toYaml $$hook.resources | nindent 12 }}
+          volumeMounts:
+            - name: config-volume
+              mountPath: /etc/es-curator
+           {{- if $.Values.extraVolumeMounts }}
+           {{- toYaml $.Values.extraVolumeMounts | nindent 12 }}
+           {{- end }}
+      volumes:
+        - name: config-volume
+          configMap:
+            name: {{ template "solr.fullname" . }}
+        {{- if $.Values.extraVolumes }}
+        {{- toYaml $.Values.extraVolumes | nindent 8 }}
+        {{- end }}
+{{- end }}
+
