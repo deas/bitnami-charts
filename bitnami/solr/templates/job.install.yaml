@@ -1,13 +1,14 @@
 {{- range $kind, $hook := .Values.hooks }}
 ---
+name: {{ include "solr.fullname" $ }}-headless
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: {{ template "solr.fullname" . }}-{{ $kind }}
-  labels: {{- include "common.labels.standard" . | nindent 4 }}
+  name: {{ template "solr.fullname" $ }}-{{ $kind }}
+  labels: {{- include "common.labels.standard" $ | nindent 4 }}
     app.kubernetes.io/component: solr
   annotations:
-    "helm.sh/hook": post-{{ $kind }}
+    "helm.sh/hook": {{ $kind }}
     "helm.sh/hook-weight": "1"
     {{/*- if $.Values.cronjob.annotations }}
     {{- toYaml $.Values.cronjob.annotations | nindent 4 }}
@@ -15,7 +16,7 @@ metadata:
 spec:
  template:
     metadata:
-      labels: {{- include "common.labels.standard" . | nindent 10 }}
+      labels: {{- include "common.labels.standard" $ | nindent 10 }}
         app.kubernetes.io/component: solr
       {{- if $.Values.podAnnotations }}
       annotations: {{- toYaml $.Values.podAnnotations | nindent 8 }}
@@ -38,9 +39,9 @@ spec:
       tolerations: {{- include "common.tplvalues.render" (dict "value" $.Values.curator.tolerations "context" $) | nindent 8 }}
       {{- end */}}
       containers:
-        - name: {{ template "solr.fullname" . }}
+        - name: {{ template "solr.fullname" $ }}
           image: {{ $hook.image }}
-          imagePullPolicy: {{ .Values.image.pullPolicy | quote }}
+          imagePullPolicy: {{ $.Values.image.pullPolicy | quote }}
           command: {{- toYaml $hook.command | nindent 12 }}
           args: {{- toYaml $hook.args | nindent 12 }}
           resources: {{- toYaml $hook.resources | nindent 12 }}
@@ -53,7 +54,7 @@ spec:
       volumes:
         - name: config-volume
           configMap:
-            name: {{ template "solr.fullname" . }}
+            name: {{ template "solr.fullname" $ }}
         {{- if $.Values.extraVolumes }}
         {{- toYaml $.Values.extraVolumes | nindent 8 }}
         {{- end }}

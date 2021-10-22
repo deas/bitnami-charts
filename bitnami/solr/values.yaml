@@ -822,7 +822,7 @@ exporter:
   hostAliases: []
 
 hooks:
-  pre-install: []
-  args: []
-  command: []
-  image: "none"
+  post-install:
+    args: []
+    command: []
+    image: "none"
