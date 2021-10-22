@@ -821,8 +821,8 @@ exporter:
   ##
   hostAliases: []
 
-  hooks:
-    pre-install: []
-    args: []
-    command: []
-    image: "none"
+hooks:
+  pre-install: []
+  args: []
+  command: []
+  image: "none"
